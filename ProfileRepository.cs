@@ -181,6 +181,7 @@ public class ProfileRepository : IProfileRepository {
 			INNER JOIN enrollments_addresses ea 
 				ON ea.addresses_fk = a.ID 
 			WHERE ea.enrollment_fk =  @enrollmentId
+			ORDER BY a.ID DESC
 		", new { enrollmentId });
 
 		_logger.LogDebug("[ProfileRepository][GetChildProfileAsync] result: {r}", r);
@@ -198,6 +199,7 @@ public class ProfileRepository : IProfileRepository {
 			JOIN enrollments_child ec
 				ON ec.child_profile_fk = cp.ID
 			WHERE ec.enrollment_fk = @enrollmentId
+			ORDER BY cp.ID DESC
 		", new { enrollmentId });
 
 		_logger.LogDebug("[ProfileRepository][GetChildProfileAsync] result: {r}", r);
@@ -214,7 +216,8 @@ public class ProfileRepository : IProfileRepository {
 			FROM parents p
 			JOIN child_parents ec 
 				ON ec.parents_fk = p.ID
-			where ec.enrollment_fk = @enrollmentId;
+			WHERE ec.enrollment_fk = @enrollmentId
+			ORDER BY p.ID DESC;
 		", new { enrollmentId });
 
 		_logger.LogDebug("[ProfileRepository][GetChildParentsAsync] result: {r}", r);
