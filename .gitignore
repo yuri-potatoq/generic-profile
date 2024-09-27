@@ -1,0 +1,8 @@
+﻿# IDE
+/.idea
+/bin
+/obj
+
+# local test
+.env
+*.db
