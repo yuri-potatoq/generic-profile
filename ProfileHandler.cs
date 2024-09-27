@@ -49,6 +49,10 @@ public class ProfileHandler {
 		    await _profileService.UpdateShiftAsync(enrollmentId,
 			    Enum.Parse<EnrollmentShift>(partial.EnrollmentShift));
 	    }
+
+	    if (partial.Terms is not null) {
+		    await _profileService.UpdateTermsAsync(enrollmentId, partial.Terms.Value);
+	    }
 	    
         return Results.Ok(await _profileService.GetFullEnrolmentAsync(enrollmentId));
     }

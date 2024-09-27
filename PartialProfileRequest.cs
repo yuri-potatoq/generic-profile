@@ -22,6 +22,9 @@ public class PartialProfileRequest {
 	[JsonPropertyName("enrollmentShift")]
 	public string? EnrollmentShift { get; set; }
 	
+	[JsonPropertyName("terms")]
+	public bool? Terms { get; set; }
+	
 	private static int calculateAge(DateOnly birthDate) {
 		var dt = birthDate.ToDateTime(TimeOnly.MinValue);
 		DateTime today = DateTime.Today;

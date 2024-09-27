@@ -59,6 +59,7 @@ public class EnrollmentState {
 	public Address address { get; set; }
 	public List<Modalities> modalities { get; set; }
 	public EnrollmentShift enrollmentShift { get; set; }
+	public bool terms { get; set; }
 }
 
 public interface IProfileRepository {
@@ -76,6 +77,8 @@ public interface IProfileRepository {
 	public Task UpdateShiftAsync(int enrollmentId, EnrollmentShift shift);
 	public Task<EnrollmentShift> GetShiftAsync(int enrollmentId);
 	public Task<bool> CheckEnrollmentAsync(int enrollmentId);
+	public Task UpdateTermAsync(int enrollmentId, bool term);
+	public Task<bool> GetTermAsync(int enrollmentId);
 } 
 
 public class ProfileRepository : IProfileRepository {
@@ -280,6 +283,28 @@ public class ProfileRepository : IProfileRepository {
 		return shifts.FirstOrDefault(EnrollmentShift.None);
 	}
 	
+	public async Task UpdateTermAsync(int enrollmentId, bool term) {
+		var r = await _db.ExecuteAsync(@"
+				INSERT INTO enrollments_terms(enrollment_fk, terms_agreement) 
+					VALUES (@enrollmentId, @term);
+			", new {
+			term,
+			enrollmentId,
+		});
+		
+		_logger.LogDebug("[ProfileRepository][UpdateTermAsync] result: {r}", r);
+	}
+	
+	public async Task<bool> GetTermAsync(int enrollmentId) {
+		var r = await _db.QuerySingleAsync<int>(@"			
+			SELECT count(*) FROM enrollments_terms 
+				WHERE terms_agreement = true AND enrollment_fk = @enrollmentId;
+		", new { enrollmentId });
+		
+		_logger.LogDebug("[ProfileRepository][GetTermAsync] result: {r}", r);
+		return r > 0;
+	}
+	
 	public async Task<EnrollmentState> GetFullEnrollment(int enrollmentId) {
 		if (!await CheckEnrollmentAsync(enrollmentId)) {
 			throw new Exception("Fail to GetFullEnrollment, enrollment not exists!");
@@ -290,6 +315,7 @@ public class ProfileRepository : IProfileRepository {
 		var address = await GetAddressAsync(enrollmentId);
 		var shift = await GetShiftAsync(enrollmentId);
 		var modalities = await GetModalitiesAsync(enrollmentId);
+		var terms = await GetTermAsync(enrollmentId);
 		
 		return new EnrollmentState {
 			Id = enrollmentId,
@@ -298,6 +324,7 @@ public class ProfileRepository : IProfileRepository {
 			address = address,
 			modalities = modalities,
 			enrollmentShift = shift,
+			terms = terms,
 		};
 	}
 }

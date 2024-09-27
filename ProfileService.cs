@@ -48,6 +48,11 @@ public class ProfileService {
 	    await _repo.UpdateShiftAsync(enrollmentId, shift);
     }
     
+    public async Task UpdateTermsAsync(int enrollmentId, bool terms) {
+	    _logger.LogDebug("[ProfileService][UpdateTermsAsync] for enrollment: {}", enrollmentId);
+	    await _repo.UpdateTermAsync(enrollmentId, terms);
+    }
+    
     public async Task<bool> CheckEnrolmentAsync(int enrollmentId) {
 	    _logger.LogDebug("[ProfileService][CheckEnrolmentAsync] for enrollment: {}", enrollmentId);
 	    return await _repo.CheckEnrollmentAsync(enrollmentId);
