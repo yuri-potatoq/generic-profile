@@ -15,12 +15,12 @@ public class ProfileHandler {
 	}
 	
 	public async Task<IResult> GetEnrollmentAsync(int enrollmentId) {
-		await _profileService.SubmitEnrollmentAsync(enrollmentId);
+		await _profileService.GetFullEnrolmentAsync(enrollmentId);
 		return Results.Ok();
 	}
 	
 	public async Task<IResult> SubmitProfileAsync([FromBody] SubmitProfileRequest submit) {
-		await _profileService.GetFullEnrolmentAsync(submit.Id);
+		await _profileService.SubmitEnrollmentAsync(submit.Id);
 		return Results.Ok();
 	}
 
