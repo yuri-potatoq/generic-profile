@@ -20,7 +20,7 @@ public class ProfileHandler {
 	}
 	
 	public async Task<IResult> SubmitProfileAsync([FromBody] SubmitProfileRequest submit) {
-		await _profileService.SubmitEnrollmentAsync(submit.Id);
+		await _profileService.GetFullEnrolmentAsync(submit.Id);
 		return Results.Ok();
 	}
 
