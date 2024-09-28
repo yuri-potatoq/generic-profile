@@ -8,6 +8,34 @@ Minimal API doing CRUD with partial updates to profile system.
 we submit the profile to check data and save as registered profile.
 - [ ] Handle multiple relations at once, create guards to MAX relations number. For now, just order and pick latest one.
 
+### API regular flow diagram
+```mermaid
+sequenceDiagram
+    %% primeiro patch para criar nova matricula
+    Client->>+API: PATCH /profile ["childInfos" sem ID]
+
+    API-->>-Client: Response com ID temp criado [erro caso dados inválidos]
+
+    API->>+DB: Cria matricula TEMP [registered=false]
+    DB-->>-API: ok
+
+    %% patch para atualizar os dados
+    Client->>+API: PATCH /profile ["parent" com ID]
+    API-->>-Client: response [erro caso dados inválidos]
+
+    API->>+DB: Atualiza matricula TEMP com ID recebido
+    DB-->>-API: ok
+
+    Note over Client,API: Agora seguem quantos PATCHS subsequentes forem necessários.
+
+    %% Submit da matricula
+    Client->>+API: POST /submit ["ID" da matricula TEMP]
+    API-->>-Client: response [erro caso dados inválidos]
+
+    API->>+DB: Atualiza matricula TEMP com ID recebido [registered=true]
+    DB-->>-API: ok
+```
+
 ### Database Modeling
 ```mermaid
 ---
