@@ -65,20 +65,20 @@ public class EnrollmentState {
 public interface IProfileRepository {
 	public Task UpdateChildProfileAsync(int enrollmentId, ChildProfile childProfile);
 	public Task UpdateChildParentsAsync(int enrollmentId, ChildParent childParent);
-	public Task<ChildProfile> GetChildProfileAsync(int enrollmentId);
-	public Task<ChildParent> GetChildParentsAsync(int enrollmentId);
+	public Task<List<ChildProfile>> GetChildProfileAsync(int enrollmentId);
+	public Task<List<ChildParent>> GetChildParentsAsync(int enrollmentId);
 	public Task<int> NewEnrollmentAsync();
-	public Task<EnrollmentState> GetFullEnrollment(int enrollmentId);
-	public Task<Address> GetAddressAsync(int enrollmentId);
+	public Task<List<Address>> GetAddressAsync(int enrollmentId);
 	public Task UpdateAddressAsync(int enrollmentId, Address address);
 	public Task UpdateModalitiesAsync(int enrollmentId, List<Modalities> modalities);
 	public Task<List<Modalities>> GetModalitiesAsync(int enrollmentId);
 
 	public Task UpdateShiftAsync(int enrollmentId, EnrollmentShift shift);
-	public Task<EnrollmentShift> GetShiftAsync(int enrollmentId);
+	public Task<List<EnrollmentShift>> GetShiftAsync(int enrollmentId);
 	public Task<bool> CheckEnrollmentAsync(int enrollmentId);
 	public Task UpdateTermAsync(int enrollmentId, bool term);
 	public Task<bool> GetTermAsync(int enrollmentId);
+	public Task SubmitEnrollmentAsync(int enrollmentId);
 } 
 
 public class ProfileRepository : IProfileRepository {
@@ -98,9 +98,15 @@ public class ProfileRepository : IProfileRepository {
 	
 	public async Task<bool> CheckEnrollmentAsync(int enrollmentId) {
 		var r = await _db.QueryFirstAsync<int>(
-			@"SELECT COUNT(*) FROM enrollments where ID = @enrollmentId;", new { enrollmentId });
+			@"SELECT COUNT(*) FROM enrollments WHERE ID = @enrollmentId;", new { enrollmentId });
 		_logger.LogDebug("[ProfileRepository][CheckEnrollmentAsync] result: {r}", r);
 		return r > 0;
+	}
+	
+	public async Task SubmitEnrollmentAsync(int enrollmentId) {
+		var r = await _db.ExecuteAsync(
+			@"UPDATE enrollments SET registered = true WHERE ID = @enrollmentId;", new { enrollmentId });
+		_logger.LogDebug("[ProfileRepository][SubmitEnrollmentAsync] result: {r}", r);
 	}
 	
 	public async Task UpdateChildParentsAsync(int enrollmentId, ChildParent childParent) {
@@ -169,7 +175,7 @@ public class ProfileRepository : IProfileRepository {
 		_logger.LogDebug("[ProfileRepository][UpdateAddressAsync] result: {r}", r);
 	}
 	
-	public async Task<Address> GetAddressAsync(int enrollmentId) {
+	public async Task<List<Address>> GetAddressAsync(int enrollmentId) {
 		var r = await _db.QueryMultipleAsync(@"			
 			SELECT 
 				a.city
@@ -185,10 +191,10 @@ public class ProfileRepository : IProfileRepository {
 		", new { enrollmentId });
 
 		_logger.LogDebug("[ProfileRepository][GetChildProfileAsync] result: {r}", r);
-		return r.ReadFirstOrDefault<Address?>() ?? new Address();
+		return r.Read<Address>().ToList();
 	}
 	
-	public async Task<ChildProfile> GetChildProfileAsync(int enrollmentId) {
+	public async Task<List<ChildProfile>> GetChildProfileAsync(int enrollmentId) {
 		var r = await _db.QueryMultipleAsync(@"			
 			SELECT 
 				full_name as 'fullName'
@@ -203,11 +209,10 @@ public class ProfileRepository : IProfileRepository {
 		", new { enrollmentId });
 
 		_logger.LogDebug("[ProfileRepository][GetChildProfileAsync] result: {r}", r);
-		var rr = r.ReadFirstOrDefault<ChildProfile?>();
-		return rr  ?? new ChildProfile { gender = Gender.None };
+		return r.Read<ChildProfile>().ToList();
 	}
 	
-	public async Task<ChildParent> GetChildParentsAsync(int enrollmentId) {
+	public async Task<List<ChildParent>> GetChildParentsAsync(int enrollmentId) {
 		var r = await _db.QueryMultipleAsync(@"
 			SELECT
 				p.email
@@ -221,7 +226,7 @@ public class ProfileRepository : IProfileRepository {
 		", new { enrollmentId });
 
 		_logger.LogDebug("[ProfileRepository][GetChildParentsAsync] result: {r}", r);
-		return r.ReadFirstOrDefault<ChildParent>() ?? new ChildParent();
+		return r.Read<ChildParent>().ToList();
 	}
 	
 	public async Task UpdateModalitiesAsync(int enrollmentId, List<Modalities> modalities) { 
@@ -270,7 +275,7 @@ public class ProfileRepository : IProfileRepository {
 		_logger.LogDebug("[ProfileRepository][UpdateShiftsAsync] result: {r}", r);
 	}
 	
-	public async Task<EnrollmentShift> GetShiftAsync(int enrollmentId) {
+	public async Task<List<EnrollmentShift>> GetShiftAsync(int enrollmentId) {
 		var r = await _db.QueryMultipleAsync(@"			
 			SELECT es.name FROM enrollments_shift es
 			LEFT JOIN enrollments_shifts ess
@@ -283,7 +288,7 @@ public class ProfileRepository : IProfileRepository {
 			select Enum.Parse<EnrollmentShift>(name);
 		
 		_logger.LogDebug("[ProfileRepository][GetShiftAsync] result: {r}", r);
-		return shifts.FirstOrDefault(EnrollmentShift.None);
+		return shifts.ToList();
 	}
 	
 	public async Task UpdateTermAsync(int enrollmentId, bool term) {
@@ -306,28 +311,5 @@ public class ProfileRepository : IProfileRepository {
 		
 		_logger.LogDebug("[ProfileRepository][GetTermAsync] result: {r}", r);
 		return r > 0;
-	}
-	
-	public async Task<EnrollmentState> GetFullEnrollment(int enrollmentId) {
-		if (!await CheckEnrollmentAsync(enrollmentId)) {
-			throw new Exception("Fail to GetFullEnrollment, enrollment not exists!");
-		} 
-		
-		var childProfile = await GetChildProfileAsync(enrollmentId);
-		var childParent = await GetChildParentsAsync(enrollmentId);
-		var address = await GetAddressAsync(enrollmentId);
-		var shift = await GetShiftAsync(enrollmentId);
-		var modalities = await GetModalitiesAsync(enrollmentId);
-		var terms = await GetTermAsync(enrollmentId);
-		
-		return new EnrollmentState {
-			Id = enrollmentId,
-			childProfile = childProfile,
-			childParent = childParent,
-			address = address,
-			modalities = modalities,
-			enrollmentShift = shift,
-			terms = terms,
-		};
 	}
 }

@@ -15,7 +15,13 @@ public class ProfileHandler {
 	}
 	
 	public async Task<IResult> GetEnrollmentAsync(int enrollmentId) {
-		return Results.Ok(await _profileService.GetFullEnrolmentAsync(enrollmentId));
+		await _profileService.SubmitEnrollmentAsync(enrollmentId);
+		return Results.Ok();
+	}
+	
+	public async Task<IResult> SubmitProfileAsync([FromBody] SubmitProfileRequest submit) {
+		await _profileService.SubmitEnrollmentAsync(submit.Id);
+		return Results.Ok();
 	}
 
 	public async Task<IResult> PartialUpdateAsync([FromBody] PartialProfileRequest partial) {

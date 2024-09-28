@@ -49,15 +49,17 @@ internal class Program {
         app.UseSwaggerUI();
         app.UseHttpsRedirection();
         
+        
         using (var serviceScope = app.Services.CreateScope()) {
 	        var services = serviceScope.ServiceProvider;
 	        var profileHandler = services.GetRequiredService<ProfileHandler>();
-
+        
 	        var profileGroup = app.MapGroup("/profile");
         
 	        profileGroup.MapPatch("/", profileHandler.PartialUpdateAsync)
 		        .AddEndpointFilter<ModelValidationFilter<PartialProfileRequest>>();
 	        profileGroup.MapGet("/{enrollmentId}", profileHandler.GetEnrollmentAsync);
+	        profileGroup.MapPost("/submit", profileHandler.SubmitProfileAsync);
         }
 		
         await app.RunAsync("http://[::]:5000");

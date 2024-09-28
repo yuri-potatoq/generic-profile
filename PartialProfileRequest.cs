@@ -4,6 +4,10 @@ using FluentValidation;
 
 namespace furry_profile;
 
+public class SubmitProfileRequest {
+	public int Id { get; set; }
+}
+
 public class PartialProfileRequest {
 	public int? Id { get; set; }
 	
