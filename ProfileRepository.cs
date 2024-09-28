@@ -41,7 +41,7 @@ public class Address {
 
 public class ChildProfile {
 	public string fullName { get; set; }
-	public string birthdate { get; set; }
+	public string birthdate { get; set; } 
 	public Gender gender { get; set; }
 	public string medicalInfo { get; set; }
 }

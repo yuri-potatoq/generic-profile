@@ -22,7 +22,8 @@ internal class Program {
         
         var connectionString = 
 	        builder.Configuration.GetConnectionString("FurryProfile") ?? "Data Source=furry_profile.db;Cache=Shared";
-	
+	    // Data Source=c:\mydb.db;Version=3;Pooling=True;Max Pool Size=100;
+	    
         builder.Services.AddSingleton<SqliteConnection>(_ => new SqliteConnection(connectionString));
         builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
         builder.Services.AddScoped<ProfileService>();
