@@ -20,13 +20,14 @@ sequenceDiagram
     DB-->>-API: ok
 
     %% patch para atualizar os dados
-    Client->>+API: PATCH /profile ["parent" com ID]
-    API-->>-Client: response [erro caso dados inválidos]
-
-    API->>+DB: Atualiza matricula TEMP com ID recebido
-    DB-->>-API: ok
-
     Note over Client,API: Agora seguem quantos PATCHS subsequentes forem necessários.
+    loop para cada campo: childInfos, parent, address, modalities, enrollmentShift, terms
+        Client->>+API: PATCH /profile ["payload" com ID]
+        API-->>-Client: response [erro caso dados inválidos]
+
+        API->>+DB: Atualiza matricula TEMP com ID recebido
+        DB-->>-API: ok
+    end
 
     %% Submit da matricula
     Client->>+API: POST /submit ["ID" da matricula TEMP]
