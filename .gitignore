@@ -1,8 +1,4 @@
-﻿# IDE
-/.idea
-/bin
-/obj
-
-# local test
+﻿# local test
 .env
 *.db
+*.sqlite
