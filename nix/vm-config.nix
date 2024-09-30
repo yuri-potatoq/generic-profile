@@ -1,3 +1,4 @@
+# ref: https://discourse.nixos.org/t/how-to-configure-postgresql-declaratively-nixos-and-non-nixos/4063/16
 { config, lib, pkgs, ... }: {
   # customize kernel version
   boot.kernelPackages = pkgs.linuxPackages_6_10;
@@ -42,7 +43,6 @@
       #  pg_repack
       #];
       # dataDir = "/home/furry-profile/datadir";
-      # port = 5432;
       enableTCPIP = true;
       ensureDatabases = [ "furry-profile" ];
       ensureUsers = [{
@@ -50,36 +50,27 @@
         ensureDBOwnership = true;
         ensureClauses.login = true;
       }];
-      #settings = ''
-      #  # CONFIG REFERENCE (with defaults)
-      #  # https://github.com/postgres/postgres/blob/40ad4202513c72f5c1beeb03e26dfbc8890770c0/src/backend/utils/misc/postgresql.conf.sample
-      #
-      #  listen_addresses = '*'
-      #  max_connections = 50
-      #  jit = off # slows done things actually
-      #
-      #  logging_collector = on
-      #  log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
-      #  log_filename = 'postgresql-%Y-%m-%d.log'
-      #  log_connections = on
-      #  log_disconnections = on
-      #  log_lock_waits = on
-      #  log_temp_files = 0
-      #  log_error_verbosity = default
-      #  #log_min_messages = debug5
-      #
-      #
-      #  # ssl = true
-      #
-      #  # those options should minimize WAL generation when inserting data
-      #  # (WAL slows down everything, because it touches disk. But we still
-      #  # cannot go with UNLOGGED tables, because those don't survive reboot)
-      #  wal_level = minimal
-      #  archive_mode = off
-      #  max_wal_senders = 0
-      #  wal_compression = on
-      #  max_wal_size = 1GB
-      #'';
+
+      settings = {
+        # ssl = true;
+
+        listen_addresses = "*";
+        max_connections = 10;
+        logging_collector = "on";
+        log_line_prefix = "%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h";
+        log_filename = "postgresql-%Y-%m-%d.log";
+        log_connections = "on";
+        log_disconnections = "on";
+        log_lock_waits = "on";
+        log_error_verbosity = "default";
+        log_min_messages = "debug5";
+        wal_level = "minimal";
+        archive_mode = "off";
+        max_wal_senders = 0;
+        wal_compression = "on";
+        max_wal_size = "1GB";
+
+      };
       authentication = pkgs.lib.mkOverride 10 ''
         #type database  DBuser  auth-method
         local all       all     trust

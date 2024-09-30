@@ -130,7 +130,8 @@ erDiagram
 ```
 
 ### Refs:
-- https://medium.com/@gabrieletronchin/asp-net-core-filter-samples-implementations-ecb2beb71b02
-- https://github.com/dotnet/runtime/issues/23510
-- https://stackoverflow.com/questions/2884863/under-what-circumstances-is-an-sqlconnection-automatically-enlisted-in-an-ambient
+- https://github.com/go-jet/jet
+- https://github.com/nofeaturesonlybugs/sqlh
+- https://github.com/jackskj/carta
+- https://github.com/harness/harness/blob/main/cmd/gitness/wire.go#L141
 

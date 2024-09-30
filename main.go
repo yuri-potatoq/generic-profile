@@ -3,29 +3,44 @@ package main
 import (
 	"context"
 	"fmt"
-	pgx "github.com/jackc/pgx/v5"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	"github.com/yuri-potatoq/generic-profile/enrollment"
 	"os"
 )
 
 type application struct {
 }
 
+type Enroll struct {
+	ID int `db:"id"`
+}
+
 func main() {
-	urlExample := "postgres://furry-profile:pass@172.30.42.187:5432/furry-profile"
-	conn, err := pgx.Connect(context.Background(), urlExample)
+	urlExample := "postgres://furry-profile:pass@172.30.42.187:5432/furry-profile?sslmode=disable"
+	ctx := context.Background()
+	pool, err := sqlx.ConnectContext(ctx, "postgres", urlExample)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
 	}
-	defer conn.Close(context.Background())
+	defer pool.Close()
 
-	var ID int
-	err = conn.QueryRow(context.Background(), "select ID from enrollments").Scan(&ID)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		os.Exit(1)
-	}
+	r := enrollment.NewEnrollmentRepository(pool)
+	s := enrollment.NewEnrollmentService(r)
+	s.GetEnrollmentState(nil, 0)
 
-	fmt.Println(ID)
+	//var enroll = Enroll{}
+	//row := pool.QueryRowxContext(context.Background(), "select ID from enrollments")
+	//if err := row.Err(); err != nil {
+	//	fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+	//	os.Exit(1)
+	//}
+	//
+	//err = row.StructScan(&enroll)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(enroll)
 
 }

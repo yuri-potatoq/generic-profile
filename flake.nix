@@ -25,6 +25,7 @@
           impl
 
           gcc
+          wire
         ];
       in
       rec {
