@@ -2,11 +2,15 @@ package server
 
 import (
 	"github.com/gorilla/mux"
+	v1 "github.com/yuri-potatoq/generic-profile/api/v1"
 	"net/http"
 )
 
 type ServerOpts struct {
-	GetEnrollmentHandler http.HandlerFunc
+	port int
+
+	GetEnrollmentHandler   *v1.GetEnrollmentHandler
+	PatchEnrollmentHandler *v1.PatchEnrollmentHandler
 }
 
 type Server struct {
@@ -20,7 +24,8 @@ func NewServer(opts *ServerOpts) *Server {
 func (s *Server) Start() error {
 
 	r := mux.NewRouter()
-	r.HandleFunc("/profile/{id}", s.opts.GetEnrollmentHandler).Methods(http.MethodGet)
+	r.Handle("/profile/{id:[0-9]+}", s.opts.GetEnrollmentHandler).Methods(http.MethodGet)
+	r.Handle("/profile", s.opts.PatchEnrollmentHandler).Methods(http.MethodPatch)
 
 	srv := http.Server{
 		Addr:    ":8080",

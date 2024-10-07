@@ -17,7 +17,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = app.closeDb()
+
 	if err != nil {
 		log.Fatal(err)
 	}

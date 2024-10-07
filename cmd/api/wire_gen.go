@@ -14,6 +14,10 @@ import (
 	"github.com/yuri-potatoq/generic-profile/server"
 )
 
+import (
+	_ "github.com/lib/pq"
+)
+
 // Injectors from wire.go:
 
 func injectApi(ctx context.Context) (*application, error) {
@@ -23,9 +27,11 @@ func injectApi(ctx context.Context) (*application, error) {
 	}
 	repository := enrollment.NewEnrollmentRepository(sqlxDB)
 	service := enrollment.NewEnrollmentService(repository)
-	handlerFunc := v1.GetEnrollmentHandler(service)
+	getEnrollmentHandler := v1.NewGetEnrollmentHandler(service)
+	patchEnrollmentHandler := v1.NewPatchEnrollmentHandler(service)
 	serverOpts := &server.ServerOpts{
-		GetEnrollmentHandler: handlerFunc,
+		GetEnrollmentHandler:   getEnrollmentHandler,
+		PatchEnrollmentHandler: patchEnrollmentHandler,
 	}
 	serverServer := server.NewServer(serverOpts)
 	mainApplication := provideApiApplication(sqlxDB, serverServer)

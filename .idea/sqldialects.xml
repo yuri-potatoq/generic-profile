@@ -2,7 +2,6 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/enrollment/repository.go" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/main.go" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/migrations/enrollment_up.sql" dialect="PostgreSQL" />
   </component>
 </project>
