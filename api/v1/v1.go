@@ -6,6 +6,7 @@ import (
 	"github.com/yuri-potatoq/generic-profile/enrollment"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type AddressDTO struct {
@@ -13,34 +14,34 @@ type AddressDTO struct {
 	Street      string `json:"street"`
 	City        string `json:"city"`
 	State       string `json:"state"`
-	HouseNumber int    `json:"house_number"`
+	HouseNumber int    `json:"number"`
 }
 
 type ChildProfileDTO struct {
-	FullName    string            `json:"full_name"`
-	Birthdate   string            `json:"birthdate"`
+	FullName    string            `json:"fullName"`
+	Birthdate   time.Time         `json:"birthdate"`
 	Gender      enrollment.Gender `json:"gender"`
-	MedicalInfo string            `json:"medical_info"`
+	MedicalInfo string            `json:"medicalInfo"`
 }
 
 type ChildParentDTO struct {
-	FullName    string `json:"full_name"`
+	FullName    string `json:"fullName"`
 	Email       string `json:"email"`
-	PhoneNumber string `json:"phone_number"`
+	PhoneNumber string `json:"phoneNumber"`
 }
 
 type EnrollmentStateDTO struct {
 	ID              *int                        `json:"id,omitempty"`
-	ChildParent     *ChildParentDTO             `json:"child_parent,omitempty"`
-	ChildProfile    *ChildProfileDTO            `json:"child_profile,omitempty"`
+	ChildParent     *ChildParentDTO             `json:"childParent,omitempty"`
+	ChildProfile    *ChildProfileDTO            `json:"childProfile,omitempty"`
 	Address         *AddressDTO                 `json:"address,omitempty"`
 	Modalities      []enrollment.Modalities     `json:"modalities,omitempty"`
-	EnrollmentShift *enrollment.EnrollmentShift `json:"enrollment_shift,omitempty"`
+	EnrollmentShift *enrollment.EnrollmentShift `json:"enrollmentShift,omitempty"`
 	Terms           *bool                       `json:"terms,omitempty"`
 }
 
-func MapEnrollmentStateResponse(stt enrollment.EnrollmentState) EnrollmentStateDTO {
-	return EnrollmentStateDTO{
+func MapEnrollmentStateResponse(stt enrollment.EnrollmentState) *EnrollmentStateDTO {
+	return &EnrollmentStateDTO{
 		ID: &stt.ID,
 		Address: &AddressDTO{
 			ZipCode:     stt.Address.ZipCode,
@@ -107,24 +108,20 @@ func (h *PatchEnrollmentHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		//TODO: write proper error payload
-		w.WriteHeader(http.StatusInternalServerError)
+		WriteErrorResponse(w, err)
 		return
 	}
 
 	stt, err := h.s.BulkUpdate(r.Context(), ToPartialUpdate(body))
 	if err != nil {
-		//TODO: write proper error payload
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		WriteErrorResponse(w, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(MapEnrollmentStateResponse(stt))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		WriteErrorResponse(w, err)
 		return
 	}
 }
@@ -145,6 +142,7 @@ func ToPartialUpdate(body EnrollmentStateDTO) enrollment.PartialUpdate {
 			ZipCode:     body.Address.ZipCode,
 			City:        body.Address.City,
 			HouseNumber: body.Address.HouseNumber,
+			State:       body.Address.State,
 		}))
 	}
 	if body.ChildParent != nil {

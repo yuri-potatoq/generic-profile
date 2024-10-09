@@ -18,6 +18,8 @@
       nixosConfigurations.test = test-vm;
 
       # expose the build attribute directly
+      # run with `nix build .#nixosConfigurations.test.config.system.build.vm`
+      # `nix build .#vms.test`
       vms.test = test-vm.config.system.build.vm;
     };
 }

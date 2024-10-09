@@ -7,7 +7,7 @@ import (
 )
 
 func ScanEnum[T ~string](t *T, tName string) func(any) error {
-	err := errors.New("Incompatible type for " + tName)
+	scanErr := errors.New("Incompatible type for " + tName)
 	return func(src any) error {
 		var source []byte
 		switch src.(type) {
@@ -17,11 +17,11 @@ func ScanEnum[T ~string](t *T, tName string) func(any) error {
 		case []byte:
 			source = src.([]byte)
 		default:
-			return err
+			return scanErr
 		}
 		b, err := io.ReadAll(bytes.NewReader(source))
 		if err != nil {
-			return err
+			return errors.Join(scanErr, err)
 		}
 		*t = T(b)
 		return nil

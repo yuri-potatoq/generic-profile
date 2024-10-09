@@ -2,6 +2,7 @@ package enrollment
 
 import (
 	"github.com/yuri-potatoq/generic-profile/infra/db"
+	"time"
 )
 
 // Gender enum
@@ -56,10 +57,10 @@ type Address struct {
 
 // ChildProfile struct
 type ChildProfile struct {
-	FullName    string `db:"full_name"`
-	Birthdate   string `db:"birthdate"`
-	Gender      Gender `db:"gender"`
-	MedicalInfo string `db:"medical_info"`
+	FullName    string    `db:"full_name"`
+	Birthdate   time.Time `db:"birthdate"`
+	Gender      Gender    `db:"gender"`
+	MedicalInfo string    `db:"medical_info"`
 }
 
 // ChildParent struct

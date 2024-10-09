@@ -55,7 +55,7 @@
         # ssl = true;
 
         listen_addresses = "*";
-        max_connections = 10;
+        max_connections = 20;
         logging_collector = "on";
         log_line_prefix = "%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h";
         log_filename = "postgresql-%Y-%m-%d.log";

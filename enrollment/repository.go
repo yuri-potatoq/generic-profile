@@ -188,11 +188,7 @@ func (r *repository) GetTerms(ctx context.Context, id int) db.Querier[bool] {
 
 func (r *repository) UpdateTerm(ctx context.Context, id int, term bool) db.Executer {
 	return db.NewExecuter(ctx, r.TxManager, func(iCtx context.Context, tx *sql.Tx) error {
-		_, err := tx.ExecContext(iCtx, `
-			INSERT INTO enrollments_terms(enrollment_fk, terms_agreement) 
-				VALUES ($1, $2);`,
-			id, term,
-		)
+		_, err := tx.ExecContext(iCtx, `CALL insert_term($1, $2);`, id, term)
 		return err
 	})
 }
@@ -232,9 +228,9 @@ func (r *repository) UpdateModalities(ctx context.Context, id int, modalities []
 func (r *repository) UpdateAddress(ctx context.Context, id int, addr Address) db.Executer {
 	return db.NewExecuter(ctx, r.TxManager, func(iCtx context.Context, tx *sql.Tx) error {
 		_, err := tx.ExecContext(iCtx, `				
-				CALL insert_address($1, $2, $3, $4, $5);
-			`,
-			id, addr.ZipCode, addr.State, addr.City, addr.HouseNumber,
+			CALL insert_address($1, $2, $3, $4, $5, $6);
+		`,
+			id, addr.ZipCode, addr.Street, addr.State, addr.City, addr.HouseNumber,
 		)
 		return err
 	})

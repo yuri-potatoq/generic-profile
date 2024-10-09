@@ -99,31 +99,6 @@ CREATE TABLE IF NOT EXISTS enrollments_child
 ---- Procedures ----
 --------------------
 
-
-CREATE OR REPLACE PROCEDURE insert_child_profile(
-	enrollmentId INTEGER,
-	fullName TEXT,
-	birthdate_arg DATE,
-	gender_arg TEXT,
-	medicalInfo TEXT
-) AS
-$BODY$
-DECLARE
-	insertedId INTEGER;
-BEGIN
-	INSERT INTO child_profile ( full_name
-							  , birthdate
-							  , gender
-							  , medical_info)
-	VALUES (fullName, birthdate_arg, gender_arg, medicalInfo)
-	RETURNING ID INTO insertedId;
-
-	INSERT INTO enrollments_child (enrollment_fk, child_profile_fk) VALUES (enrollmentId, insertedId);
-END
-$BODY$
-	LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE PROCEDURE insert_child_profile(
 	enrollmentId INTEGER,
 	fullName TEXT,
@@ -220,6 +195,19 @@ BEGIN
 
 	INSERT INTO enrollments_shifts(enrollment_fk, enrollments_shift_fk)
 	VALUES (enrollmentId, (SELECT ID FROM enrollments_shift where name = shift));
+END
+$BODY$
+	LANGUAGE plpgsql;
+
+CREATE OR REPLACE PROCEDURE insert_term(
+	enrollmentId INTEGER,
+	term BOOLEAN
+) AS $BODY$
+BEGIN
+	DELETE FROM enrollments_terms where enrollment_fk = enrollmentId;
+
+	INSERT INTO enrollments_terms(enrollment_fk, terms_agreement)
+	VALUES (enrollmentId, term);
 END
 $BODY$
 	LANGUAGE plpgsql;
